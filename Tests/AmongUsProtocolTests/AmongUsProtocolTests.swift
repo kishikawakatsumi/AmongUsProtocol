@@ -9,6 +9,36 @@ final class AmongUsProtocolTests: XCTestCase {
         XCTAssertEqual(buffer.readPackedUInt32(), 4427)
     }
 
+    func testParseReselectServer() throws {
+        let raw = "0034000e01021600000d417369612d4d61737465722d318ba26fc40756d7061600000d417369612d4d61737465722d32ac6860630756d206"
+        let packet = try XCTUnwrap(Data(hex: raw))
+
+        let auPacket = try XCTUnwrap(PacketParser.parse(packet: packet))
+        guard case .normal(let normal) = auPacket else {
+            XCTFail()
+            return
+        }
+        XCTAssertEqual(normal.messages.count, 1)
+
+        guard case .reselectServer(let reselectServer) = normal.messages[0].payload else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(reselectServer.masterServersLength, 2)
+        XCTAssertEqual(reselectServer.masterServers.count, 2)
+
+        XCTAssertEqual(reselectServer.masterServers[0].name, "Asia-Master-1")
+        XCTAssertEqual(reselectServer.masterServers[0].ipAddress, "139.162.111.196")
+        XCTAssertEqual(reselectServer.masterServers[0].port, 22023)
+        XCTAssertEqual(reselectServer.masterServers[0].numberOfConnections, 855)
+
+        XCTAssertEqual(reselectServer.masterServers[1].name, "Asia-Master-2")
+        XCTAssertEqual(reselectServer.masterServers[1].ipAddress, "172.104.96.99")
+        XCTAssertEqual(reselectServer.masterServers[1].port, 22023)
+        XCTAssertEqual(reselectServer.masterServers[1].numberOfConnections, 850)
+    }
+
     func testParseHelloPacket() throws {
         let raw = "080001004ae202030a496e6e657273726f7468"
         let packet = try XCTUnwrap(Data(hex: raw))

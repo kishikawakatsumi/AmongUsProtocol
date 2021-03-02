@@ -192,12 +192,55 @@ public enum PacketParser {
         case .redirect:
             break
         case .reselectServer:
-            break
+            guard length > 0 else { return nil }
+            let version = payloadBuffer.read(UInt8.self)
+            guard length > 0 else { return nil }
+            let masterServersLength = payloadBuffer.readPackedUInt32()
+
+            var masterServers = [MasterServer]()
+            for _ in 0..<masterServersLength {
+                guard let masterServer = parseMasterServer(buffer: payloadBuffer) else { continue }
+                masterServers.append(masterServer)
+            }
+
+            return HazelMessage(
+                length: length,
+                tag: tag,
+                payload: .reselectServer(
+                    ReselectServer(
+                        version: version,
+                        masterServersLength: masterServersLength,
+                        masterServers: masterServers
+                    )
+                )
+            )
         case .getGameListV2:
             break
         }
 
         return nil
+    }
+
+    static func parseMasterServer(buffer: ByteBuffer) -> MasterServer? {
+        guard buffer.availableBytes > 1 else { return nil }
+        let length = buffer.read(UInt16.self)
+
+        guard buffer.availableBytes >= length else { return nil }
+        let tag = buffer.read(UInt8.self)
+
+        let name = buffer.read(String.self)
+        let ipAddress = buffer.read(UInt32.self)
+        let port = buffer.read(UInt16.self)
+        let numberOfConnections = buffer.readPackedUInt32()
+
+        return MasterServer(
+            length: length,
+            tag: tag,
+            name: name,
+            ipAddress: decimalToIpAddress(ipAddress),
+            port: port,
+            numberOfConnections: numberOfConnections
+        )
     }
 
     static func parseGameOptionsData(buffer: ByteBuffer) -> GameOptionsData {

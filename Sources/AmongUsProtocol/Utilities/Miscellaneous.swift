@@ -34,3 +34,16 @@ func decodeClientVersion(_ version: Int32) -> String {
     let revision = m % 50
     return "\(Int(year)).\(Int(month)).\(Int(day)).\(revision)"
 }
+
+func decimalToIpAddress(_ decimal: UInt32) -> String {
+    var ip = ""
+    var delimiter = ""
+    var decimal = decimal
+    for e in (0...3).reversed() {
+        let octet = decimal / UInt32(pow(Double(256), Double(e)))
+        decimal -= octet * UInt32(pow(Double(256), Double(e)))
+        ip = "\(octet)\(delimiter)\(ip)"
+        delimiter = "."
+    }
+    return ip
+}
