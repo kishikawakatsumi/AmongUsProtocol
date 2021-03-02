@@ -6,6 +6,7 @@ public enum RootMessage: Equatable {
     case startGame(String)
     case gameData(GameData)
     case endGame(EndGame)
+    case redirect(Redirect)
     case reselectServer(ReselectServer)
 }
 
@@ -22,6 +23,8 @@ extension RootMessage: CustomStringConvertible {
             return "{Game Data: \(gameData)}"
         case .endGame(let endGame):
             return "{End Game: \(endGame)}"
+        case .redirect(let redirect):
+            return "{Redirect: \(redirect)}"
         case .reselectServer(let reselectServer):
             return "{Reselect Server: \(reselectServer)}"
         }

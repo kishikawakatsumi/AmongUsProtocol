@@ -9,6 +9,26 @@ final class AmongUsProtocolTests: XCTestCase {
         XCTAssertEqual(buffer.readPackedUInt32(), 4427)
     }
 
+    func testParseRedirect() throws {
+        let raw = "01000106000dac6bd5c23357"
+        let packet = try XCTUnwrap(Data(hex: raw))
+
+        let auPacket = try XCTUnwrap(PacketParser.parse(packet: packet))
+        guard case .reliable(let reliable) = auPacket else {
+            XCTFail()
+            return
+        }
+        XCTAssertEqual(reliable.messages.count, 1)
+
+        guard case .redirect(let redirect) = reliable.messages[0].payload else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(redirect.ipAddress, "172.107.213.194")
+        XCTAssertEqual(redirect.port, 22323)
+    }
+
     func testParseReselectServer() throws {
         let raw = "0034000e01021600000d417369612d4d61737465722d318ba26fc40756d7061600000d417369612d4d61737465722d32ac6860630756d206"
         let packet = try XCTUnwrap(Data(hex: raw))

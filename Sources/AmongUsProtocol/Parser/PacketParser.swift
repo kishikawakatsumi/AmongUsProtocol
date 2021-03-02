@@ -140,12 +140,12 @@ public enum PacketParser {
 
             return HazelMessage(length: length, tag: tag, payload: .hostGame(gameOptionsData))
         case .joinGame:
-            guard length == 5 else { return nil }
+            guard length == 5 && payloadBuffer.availableBytes >= length else { return nil }
             let joinGame = parseJoinGame(buffer: payloadBuffer)
             
             return HazelMessage(length: length, tag: tag, payload: .joinGame(joinGame))
         case .startGame:
-            guard length == 4 else { return nil }
+            guard length == 4 && payloadBuffer.availableBytes >= length else { return nil }
 
             let gameId = payloadBuffer.read(Int32.self)
             let gameCode = gameIdToCode(gameId: gameId)
@@ -163,7 +163,7 @@ public enum PacketParser {
         case .joinedGame:
             break
         case .endGame:
-            guard length == 6 else { return nil }
+            guard length == 6 && payloadBuffer.availableBytes >= length else { return nil }
 
             let gameId = payloadBuffer.read(Int32.self)
             let gameCode = gameIdToCode(gameId: gameId)
@@ -190,7 +190,17 @@ public enum PacketParser {
         case .waitForHost:
             break
         case .redirect:
-            break
+            guard length == 6 && payloadBuffer.availableBytes >= length else { return nil }
+            let ipAddress = decimalToIpAddress(payloadBuffer.read(UInt32.self))
+            let port = payloadBuffer.read(UInt16.self)
+
+            return HazelMessage(
+                length: length,
+                tag: tag,
+                payload: .redirect(
+                    Redirect(ipAddress: ipAddress, port: port)
+                )
+            )
         case .reselectServer:
             guard length > 0 else { return nil }
             let version = payloadBuffer.read(UInt8.self)
