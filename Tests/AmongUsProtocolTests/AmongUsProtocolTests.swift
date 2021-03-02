@@ -2,6 +2,13 @@ import XCTest
 @testable import AmongUsProtocol
 
 final class AmongUsProtocolTests: XCTestCase {
+    func testReadPackedUInt32() throws {
+        let raw = "cb22"
+        let packet = try XCTUnwrap(Data(hex: raw))
+        let buffer = ByteBuffer(packet)
+        XCTAssertEqual(buffer.readPackedUInt32(), 4427)
+    }
+
     func testParseHelloPacket() throws {
         let raw = "080001004ae202030a496e6e657273726f7468"
         let packet = try XCTUnwrap(Data(hex: raw))

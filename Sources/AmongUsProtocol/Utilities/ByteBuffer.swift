@@ -54,7 +54,7 @@ public class ByteBuffer {
                 readMore = false
             }
 
-            output |= (UInt32)(b << shift)
+            output |= (UInt32(b) << shift)
             shift += 7
         }
 
