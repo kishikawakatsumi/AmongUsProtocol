@@ -38,6 +38,10 @@ public class ByteBuffer {
         return String(data: value, encoding: .utf8) ?? String(repeating: "?", count: count)
     }
 
+    public func readPackedInt32() -> Int32 {
+        Int32(truncatingIfNeeded: readPackedUInt32())
+    }
+
     public func readPackedUInt32() -> UInt32 {
         var readMore = true
         var shift = 0

@@ -132,7 +132,7 @@ public enum PacketParser {
         guard let type = RootMessageType(rawValue: tag) else { return nil }
         switch type {
         case .hostGame:
-            let payloadLength = Int(payloadBuffer.readPackedUInt32())
+            let payloadLength = Int(payloadBuffer.readPackedInt32())
             guard payloadBuffer.availableBytes >= payloadLength else { return nil }
 
             let buffer = ByteBuffer(payloadBuffer.read(Data.self, count: payloadLength))
@@ -392,7 +392,7 @@ public enum PacketParser {
                 case .completeTask:
                     break
                 case .syncSettings:
-                    let payloadLength = Int(buffer.readPackedUInt32())
+                    let payloadLength = Int(buffer.readPackedInt32())
                     guard buffer.availableBytes >= payloadLength else { return nil }
 
                     let buffer = ByteBuffer(buffer.read(Data.self, count: payloadLength))
@@ -667,7 +667,7 @@ public enum PacketParser {
                 guard let spawnType = SpawnType(rawValue: buffer.readPackedUInt32()) else { return nil }
 
                 guard buffer.availableBytes > 0 else { return nil }
-                let ownerId = Int32(buffer.readPackedUInt32())
+                let ownerId = buffer.readPackedInt32()
 
                 guard buffer.availableBytes > 0 else { return nil }
                 guard let spawnFlags = SpawnFlag(rawValue: buffer.read(UInt8.self)) else { return nil }
