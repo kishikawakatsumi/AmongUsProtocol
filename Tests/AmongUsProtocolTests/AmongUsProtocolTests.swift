@@ -59,6 +59,25 @@ final class AmongUsProtocolTests: XCTestCase {
         XCTAssertEqual(reselectServer.masterServers[1].numberOfConnections, 850)
     }
 
+    func testParseGameData() throws {
+        let raw = "010004be0005000000000c000402feffffff0f00010100000112000403feffffff0f0002020100010003010001001e000404e68d01010304020001010005000001060a00010000ff7fff7fff7fff7f31000204022e040a01000000000000803f0000803f0000c03f0000f0410203050100000002000f00000078000000000f000001010d000204060a496e6e657273726f7468030002040800030002041100030002040900030002040a00160002021e1100000a496e6e657273726f7468000000000000"
+        let packet = try XCTUnwrap(Data(hex: raw))
+
+        let auPacket = try XCTUnwrap(PacketParser.parse(packet: packet))
+        guard case .reliable(let reliable) = auPacket else {
+            XCTFail()
+            return
+        }
+        XCTAssertEqual(reliable.messages.count, 1)
+
+        guard case .gameData(let gameData) = reliable.messages[0].payload else {
+            XCTFail()
+            return
+        }
+
+        XCTAssertEqual(gameData.messages.count, 10)
+    }
+
     func testParseHelloPacket() throws {
         let raw = "080001004ae202030a496e6e657273726f7468"
         let packet = try XCTUnwrap(Data(hex: raw))
@@ -80,6 +99,10 @@ final class AmongUsProtocolTests: XCTestCase {
     }
 
     static var allTests = [
+        ("testReadPackedUInt32", testReadPackedUInt32),
+        ("testParseRedirect", testParseRedirect),
+        ("testParseRedirect", testParseRedirect),
+        ("testParseGameData", testParseGameData),
         ("testParseHelloPacket", testParseHelloPacket),
         ("testParseDisconnectPacket", testParseDisconnectPacket),
     ]
