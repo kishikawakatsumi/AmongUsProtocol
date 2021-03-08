@@ -60,13 +60,21 @@ public enum PacketParser {
     }
 
     static func parseHelloPacket(packet: Data) -> HelloPacket? {
-        guard packet.count > 1 else { return nil }
+        guard packet.count > 0 else { return nil }
         let buffer = ByteBuffer(packet)
 
         let opcode = buffer.read(UInt8.self)
+
+        guard buffer.availableBytes > 1 else { return nil }
         let nonce = buffer.read(UInt16.self).bigEndian
+
+        guard buffer.availableBytes > 0 else { return nil }
         let hazelVersion = buffer.read(UInt8.self)
+
+        guard buffer.availableBytes > 3 else { return nil }
         let clientVersion = decodeClientVersion(buffer.read(Int32.self))
+
+        guard buffer.availableBytes > 1 else { return nil }
         let username = buffer.read(String.self)
 
         return HelloPacket(
